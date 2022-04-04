@@ -10,12 +10,15 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.movierow.models.Movie
 import com.example.movierow.models.getMovies
+import com.example.movierow.widget.HorizontalScrollableImageView
 import com.example.movierow.widget.MovieRow
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -60,15 +63,30 @@ fun DetailScreen(
 @Composable
 
 fun MainContent(movie: Movie) {
-    MovieRow(movie = movie)
 
-    Spacer(
-        modifier = Modifier
-            .height(8.dp)
-    )
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight()
+    ) {
+        Column {
+            MovieRow(movie = movie)
 
-    Divider()
+            Spacer(
+                modifier = Modifier
+                    .height(8.dp)
+            )
 
+            Divider()
+
+            Text(text = "Movie Images",
+                modifier = Modifier
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            HorizontalScrollableImageView(movie = movie)
+        }
+    }
 }
 
 fun filterMovie(movieId: String?) : Movie {
