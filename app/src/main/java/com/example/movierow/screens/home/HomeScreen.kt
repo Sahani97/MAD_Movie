@@ -18,10 +18,14 @@ import com.example.movierow.models.Movie
 import com.example.movierow.models.getMovies
 import com.example.movierow.navi.MovieScreens
 import com.example.movierow.ui.theme.MovieRowTheme
+import com.example.movierow.viewmodels.MovieViewModel
 import com.example.movierow.widget.MovieRow
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.movierow.widget.FavouriteIcon
 
 @Composable
 fun HomeScreen(
+    viewModel: MovieViewModel = viewModel(),
     navController: NavController = rememberNavController()
 ) {
     var showMenu by remember {
@@ -29,52 +33,67 @@ fun HomeScreen(
     }
 
 
-        Scaffold(
-            topBar = {
-                TopAppBar(title = { Text(text = "Movies") },
-                    actions ={
-                        IconButton(onClick = { showMenu = !showMenu}){
-                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
-                        }
-
-                        DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                            DropdownMenuItem(onClick = { navController.navigate(MovieScreens.FavouriteScreen.name) }) {
-                                Row {
-                                    Icon(imageVector = Icons.Default.Favorite,
-                                        contentDescription = "Favourites",
-                                        modifier = Modifier.padding(4.dp)
-                                    )
-                                    Text(text = "Favourites",
-                                        modifier = Modifier
-                                            .padding(4.dp)
-                                            .width(100.dp)
-                                    )
-                                }
-
-                            }
-                        }
-
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text(text = "Movies") },
+                actions = {
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
                     }
-                )
-            }
 
-        ){
-            MainContent(navController = navController)
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        DropdownMenuItem(onClick = { navController.navigate(MovieScreens.FavouriteScreen.name) }) {
+                            Row {
+                                Icon(
+                                    imageVector = Icons.Default.Favorite,
+                                    contentDescription = "Favourites",
+                                    modifier = Modifier.padding(4.dp)
+                                )
+                                Text(
+                                    text = "Favourites",
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .width(100.dp)
+                                )
+                            }
+
+                        }
+                    }
+
+                }
+            )
         }
+
+    ) {
+        MainContent(viewModel = viewModel, navController = navController)
+
+
     }
-
-
+}
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun MainContent(navController: NavController, movieList: List<Movie> = getMovies()) {
+fun MainContent(
+    viewModel: MovieViewModel = viewModel(),
+    navController: NavController,
+    movieList: List<Movie> = getMovies()
+) {
     LazyColumn {
         items(movieList) { movies ->
-            MovieRow(movie = movies) {
-                movieId ->
-                navController.navigate(route = MovieScreens.DetailScreen.name + "/$movieId")
-            }
+            MovieRow(movie = movies, viewFavIconState = true, State = viewModel.checkFavourite(movies),
+                onFavouriteClick = {
+                    if (viewModel.checkFavourite(it)) {
+                        viewModel.removeMovie(it)
+                    }else{
+                        viewModel.addMovie(it)
+                    }
+                },
+                onItemClick = { movieId ->
+                    navController.navigate(route = MovieScreens.DetailScreen.name + "/$movieId")
+
+                }
+            )
         }
     }
 }

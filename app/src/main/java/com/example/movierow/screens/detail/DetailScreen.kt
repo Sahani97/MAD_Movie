@@ -14,10 +14,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.movierow.models.Movie
 import com.example.movierow.models.getMovies
+import com.example.movierow.viewmodels.MovieViewModel
 import com.example.movierow.widget.HorizontalScrollableImageView
 import com.example.movierow.widget.MovieRow
 
@@ -25,6 +27,7 @@ import com.example.movierow.widget.MovieRow
 @Preview(showBackground = true)
 @Composable
 fun DetailScreen(
+    viewModel: MovieViewModel = viewModel(),
     navController: NavController = rememberNavController(),
     movieId: String? = "tt0499549"
 ){
@@ -33,8 +36,7 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-
-                backgroundColor = Color.Gray,
+                backgroundColor = Color.Cyan,
                 elevation = 3.dp
             ){
                 Row {
@@ -55,21 +57,34 @@ fun DetailScreen(
         }
 
     ) {
-        MainContent(movie = movie)
+        MainContent(viewModel = viewModel, movie = movie)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 
-fun MainContent(movie: Movie) {
+fun MainContent(
+    viewModel: MovieViewModel = viewModel(),
+    movie: Movie
+) {
 
     Surface(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
     ) {
         Column {
-            MovieRow(movie = movie)
+            MovieRow(
+                movie = movie, viewFavIconState = true, State = viewModel.checkFavourite(movie),
+                onFavouriteClick = {
+                    if (viewModel.checkFavourite(it)) {
+                        viewModel.removeMovie(it)
+                    }else{
+                        viewModel.addMovie(it)
+                    }
+                }
+
+            )
 
             Spacer(
                 modifier = Modifier

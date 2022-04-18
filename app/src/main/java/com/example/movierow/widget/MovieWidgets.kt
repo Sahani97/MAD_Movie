@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
@@ -34,7 +36,11 @@ import com.example.movierow.models.getMovies
 @Composable
 fun MovieRow(
     movie: Movie = getMovies()[0],
-    onItemClick: (String) -> Unit = {}
+    viewFavIconState: Boolean,
+    State: Boolean,
+    onItemClick: (String) -> Unit = {},
+    onFavouriteClick: (Movie) -> Unit = {}
+
 ) {
 
 
@@ -65,9 +71,9 @@ fun MovieRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(modifier = Modifier.size(100.dp)) {
-               /* Icon(imageVector = Icons.Default.AccountBox,
-                    contentDescription = "movie pic")
-                */
+                /* Icon(imageVector = Icons.Default.AccountBox,
+                     contentDescription = "movie pic")
+                 */
                 AsyncImage(
                     model = movie.images[0],
                     contentDescription = null,
@@ -91,26 +97,33 @@ fun MovieRow(
                 )
                 Text(
                     text = "Director: ${movie.director}",
-                    style = MaterialTheme.typography.caption)
+                    style = MaterialTheme.typography.caption
+                )
                 Text(
                     text = "Released: ${movie.year}",
-                    style = MaterialTheme.typography.caption)
+                    style = MaterialTheme.typography.caption
+                )
 
-                if(!expandedState){
+                FavouriteIcon(movie, viewFavouriteIcon = viewFavIconState, State = State) { movie ->
+                    onFavouriteClick(movie)
+                }
+
+                if (!expandedState) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "arrow-down",
                         modifier = Modifier
-                            .clickable(onClick = {expandedState = !expandedState})
+                            .clickable(onClick = { expandedState = !expandedState })
                     )
-                }else{
+                } else {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowUp,
                         contentDescription = "arrow-up",
                         modifier = Modifier
-                            .clickable(onClick = {expandedState = !expandedState})
+                            .clickable(onClick = { expandedState = !expandedState })
                     )
                 }
+
 
                 /*
                 IconButton(
@@ -125,7 +138,9 @@ fun MovieRow(
                         contentDescription =
                     )
                 }*/
-                AnimatedVisibility(visible = expandedState){
+
+
+                AnimatedVisibility(visible = expandedState) {
                     Column(
                         modifier = Modifier.padding(5.dp)
                     ) {
@@ -154,29 +169,61 @@ fun MovieRow(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-
-
                 }
-
-
             }
         }
     }
 }
 
 @Composable
-fun HorizontalScrollableImageView(movie: Movie = getMovies()[0]){
-    LazyRow{
-        items(movie.images){
-            image ->
+fun FavouriteIcon(
+    movie: Movie,
+    viewFavouriteIcon: Boolean,
+    State: Boolean,
+    onFavouriteClick: (Movie) -> Unit = {}
+) {
+    var favouriteChecked by remember { mutableStateOf(State) }
+
+    if (viewFavouriteIcon) {
+
+        if (!favouriteChecked) {
+            Icon(
+                imageVector = Icons.Default.FavoriteBorder,
+                contentDescription = "favourite-border",
+                modifier = Modifier
+                    .clickable(onClick = {
+                        favouriteChecked = !favouriteChecked
+                        onFavouriteClick(movie)
+                    })
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "favourite",
+                modifier = Modifier
+                    .clickable(onClick = {
+                        favouriteChecked = !favouriteChecked
+                        onFavouriteClick(movie)
+                    })
+            )
+        }
+
+    }
+}
+
+
+@Composable
+fun HorizontalScrollableImageView(movie: Movie = getMovies()[0]) {
+    LazyRow {
+        items(movie.images) { image ->
 
             Card(
                 modifier = Modifier
                     .padding(12.dp)
                     .size(240.dp),
                 elevation = 4.dp
-            ){
-                
+            ) {
+
                 AsyncImage(
                     model = image,
                     contentDescription = null
